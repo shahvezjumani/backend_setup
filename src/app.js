@@ -34,8 +34,4 @@ app.use(
 );
 app.use(helmet());
 
-app.get("/", (req, res) => {
-  res.json("hello");
-});
-
 export default app;
