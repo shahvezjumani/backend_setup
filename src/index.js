@@ -6,7 +6,6 @@ import { connectToDatabase, disconnectFromDatabase } from "./lib/mongoose.js";
 (async () => {
   try {
     await connectToDatabase();
-    app.use("/api/v1", v1Routes);
 
     app.listen(config.PORT, () => {
       console.log(`server running : http://localhost:${config.PORT}`);

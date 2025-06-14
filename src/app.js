@@ -4,6 +4,7 @@ import config from "./config/index.js";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
+import { errorHandler } from "./utils/errorHandler.js";
 
 const app = express();
 
@@ -34,4 +35,9 @@ app.use(
 );
 app.use(helmet());
 
+import userRouter from "./routes/v1/user.route.js";
+app.use("/api/v1/user", userRouter);
+
+
+app.use(errorHandler);
 export default app;
