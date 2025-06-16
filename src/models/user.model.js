@@ -1,4 +1,5 @@
 import { model, Schema } from "mongoose";
+import bcrypt from "bcrypt";
 
 const userSchema = new Schema(
   {
@@ -17,7 +18,7 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Password is required"],
       minLength: [8, "Password must be greather than 8 characters"],
-      select: false,
+      // select: false,
     },
     role: {
       type: String,
@@ -47,8 +48,29 @@ const userSchema = new Schema(
         type: String,
       },
     },
+    refreshToken: {
+      type: String,
+    },
   },
   { timestamps: true },
 );
+
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    return next();
+  } catch (err) {
+    return next(err);
+  }
+});
+
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+
 
 export const User = model("User", userSchema);
