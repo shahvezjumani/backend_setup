@@ -4,14 +4,14 @@ import { body, param } from "express-validator";
 import validationError from "../../middlewares/validationError.js";
 import {
   handleCreateComment,
-  handleDeleteComment,
   handleGetCommentsByBlog,
+  handleDeleteComment,
 } from "../../controllers/comment.controller.js";
 
 const router = Router();
 
 router
-  .post("/blog/:blogId")
+  .route("/blog/:blogId")
   .post(
     verifyJWT,
     param("blogId").isMongoId().withMessage("Invalid blog ID"),
@@ -20,11 +20,13 @@ router
     handleCreateComment,
   );
 
-router.route("/blog/:blogId").get(
-  verifyJWT,
-  param("blogId").isMongoId().withMessage("Invalid blog ID"),
-  validationError,
-  handleCreateComment,
-);
+router
+  .route("/blog/:blogId")
+  .get(
+    verifyJWT,
+    param("blogId").isMongoId().withMessage("Invalid blog ID"),
+    validationError,
+    handleGetCommentsByBlog,
+  );
 
 export default router;

@@ -51,4 +51,5 @@ export {
   deleteComment,
   findCommentsByBlog,
   findCommentByUserId,
+  findComment
 };
