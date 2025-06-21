@@ -9,9 +9,15 @@ import {
   deleteUser,
   getAllUsers,
 } from "../repositories/userRepository.js";
+import {
+  deleteBlog,
+  findBlogWithAuthor,
+} from "../repositories/blog.repository.js";
 import { generateAccessToken, generateRefreshToken } from "../lib/jwt.js";
 import config from "../config/index.js";
 import jwt from "jsonwebtoken";
+import { deleteFromCloudinary } from "../lib/cloudinary.js";
+import cloudinary from "cloudinary";
 
 const handleRegisterUser = asyncHandler(async (req, res) => {
   const { userName, email, password, role } = req.body;
@@ -237,6 +243,15 @@ const handleUpdateCurrentUser = asyncHandler(async (req, res) => {
 
 const handleDeleteCurrentUser = asyncHandler(async (req, res) => {
   const { userId } = req.user;
+  const blogs = await findBlogWithAuthor(userId);
+
+  const publicIds = blogs.map((blog) => blog.banner?.publicId);
+  if (publicIds && publicIds.length > 0) {
+    await cloudinary.api.detete_resources(publicIds);
+  }
+
+  await deleteBlog(userId);
+
   await deleteUser(userId);
   const user = await findUserWithId(userId);
 
@@ -259,10 +274,10 @@ const handleDeleteCurrentUser = asyncHandler(async (req, res) => {
 });
 
 const handleGetAllUsers = asyncHandler(async (req, res) => {
-  const limit = parseInt(req.query.limit) ?? config.defaultResLimit;
-  const offset = parseInt(req.query.offset) ?? config.defaultResOffset;
+  const limit = Number(req.query.limit) ?? config.defaultResLimit;
+  const offset = Number(req.query.offset) ?? config.defaultResOffset;
   const users = await getAllUsers(limit, offset);
-  if (!users) {
+  if (!users || users.length === 0) {
     throw new ApiError(400, "No users found");
   }
   console.log("hi");
@@ -276,7 +291,7 @@ const handleGetUser = asyncHandler(async (req, res) => {
   const { userId } = req.params;
   const user = await findUserWithId(userId);
   if (!user) {
-    throw new ApiError(400, "User not found");
+    throw new ApiError(404, "User not found");
   }
 
   const userObj = user.toObject();
@@ -294,8 +309,14 @@ const handleDeleteUser = asyncHandler(async (req, res) => {
   if (!user) {
     throw new ApiError(400, "User not found");
   }
+  const blogs = await findBlogWithAuthor(userId);
 
-  await user.deleteUser(userId);
+  const publicIds = blogs.map((blog) => blog.banner?.publicId);
+  if (publicIds && publicIds.length > 0) {
+    await cloudinary.api.detete_resources(publicIds);
+  }
+
+  await deleteUser(userId);
 
   return res
     .status(200)

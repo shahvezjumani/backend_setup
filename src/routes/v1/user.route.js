@@ -13,7 +13,7 @@ import {
   handleDeleteCurrentUser,
   handleGetAllUsers,
   handleGetUser,
-  handleDeleteUser
+  handleDeleteUser,
 } from "../../controllers/user.controller.js";
 
 const router = Router();
@@ -34,16 +34,16 @@ router
     handleLogin,
   );
 
-router.route("/").get(verifyJWT, (req, res) => {
-  return res.json({ message: "hello world" });
-});
+// router.route("/").get(verifyJWT, (req, res) => {
+//   return res.json({ message: "hello world" });
+// });
 
 router.route("/refreshToken").post(handleRefreshToken);
 
 router.route("/logout").post(verifyJWT, handleLogout);
 
 router
-  .route("/all")
+  .route("/")
   .get(
     verifyJWT,
     restrictTo(["admin"]),
@@ -79,12 +79,14 @@ router
     verifyJWT,
     restrictTo(["admin"]),
     param("userId").notEmpty().isMongoId().withMessage("invalid user Id"),
+    validationError,
     handleGetUser,
   )
   .delete(
     verifyJWT,
     restrictTo(["admin"]),
     param("userId").notEmpty().isMongoId().withMessage("invalid user Id"),
+    validationError,
     handleDeleteUser,
   );
 

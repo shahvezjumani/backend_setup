@@ -37,8 +37,13 @@ app.use(helmet());
 
 import userRouter from "./routes/v1/user.route.js";
 import blogRouter from "./routes/v1/blog.route.js";
+import likeRouter from "./routes/v1/like.route.js";
+import commentRouter from "./routes/v1/comment.route.js";
+
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/blog", blogRouter);
+app.use("/api/v1/like", likeRouter);
+app.use("/api/v1/comment", commentRouter);
 
 app.use(errorHandler);
 export default app;
